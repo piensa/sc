@@ -1,0 +1,25 @@
+version: '2.2'
+services:
+  django:
+    environment:
+      DEBUG: 'True'
+      GEONODE_LB_HOST_IP: sc.puerti.co
+      GEONODE_LB_PORT: 80
+      SITEURL: http://sc.puerti.co/
+      ALLOWED_HOSTS: "['sc.puerti.co']"
+      GEOSERVER_PUBLIC_LOCATION: http://sc.puerti.co/gs/
+
+  celery:
+    environment:
+      DEBUG: 'True'
+      GEONODE_LB_HOST_IP: sc.puerti.co
+      GEONODE_LB_PORT: 80
+      SITEURL: http://sc.puerti.co/
+      ALLOWED_HOSTS: "['sc.puerti.co', 'localhost']"
+      GEOSERVER_PUBLIC_LOCATION: http://sc.puerti.co/gs/
+
+  geoserver:
+    environment:
+      GEONODE_LB_HOST_IP: sc.puerti.co
+      GEONODE_LB_PORT: 80
+      NGINX_BASE_URL:
