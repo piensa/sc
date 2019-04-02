@@ -3,7 +3,7 @@ MAINTAINER GeoNode development team
 
 RUN mkdir -p /usr/src/sc
 
-WORKDIR /usr/src/sc
+WORKDIR /usr
 
 RUN apt-get update && apt-get install -y \
 		gcc \
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
                 uwsgi uwsgi-plugin-python \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
-# python-gdal does not seem to work, let's replace it by pygdal
+# python-gdal does not work, let's replace it by pygdal
 RUN GDAL_VERSION=`gdal-config --version` \
     && PYGDAL_VERSION="$(pip install pygdal==$GDAL_VERSION 2>&1 | grep -oP '(?<=: )(.*)(?=\))' | grep -oh $GDAL_VERSION\.[0-9])" \
     && pip install pygdal==$PYGDAL_VERSION
@@ -27,21 +27,21 @@ RUN GDAL_VERSION=`gdal-config --version` \
 # fix for known bug in system-wide packages
 RUN ln -fs /usr/lib/python2.7/plat-x86_64-linux-gnu/_sysconfigdata*.py /usr/lib/python2.7/
 
-# app-specific requirements
-#COPY requirements.txt /usr/src/sc/
-#RUN pip install --upgrade --no-cache-dir --src /usr/src -r requirements.txt
 RUN pip install pipenv
-
+COPY Pipfile /usr/
+COPY Pipfile.lock /usr/
+RUN pipenv install --system
 
 # This should be close to the last step in order to avoid rebuilding image during development.
 COPY . /usr/src/sc
-RUN pipenv install --system
-#RUN pip install --no-deps --upgrade -e .
+WORKDIR /usr/src/sc
 
-RUN chmod +x /usr/src/sc/tasks.py \
-    && chmod +x /usr/src/sc/entrypoint.sh
+# Patch if needed from the patches folder
+RUN cd /usr/local/lib/python2.7/site-packages; \
+    for i in /usr/src/sc/patches/*.patch; do patch -p1 < $i; done
 
-COPY wait-for-databases.sh /usr/bin/wait-for-databases
-RUN chmod +x /usr/bin/wait-for-databases
+# Patch geonode if needed
+RUN cd /usr/src/geonode; \
+    for i in /usr/src/sc/patches/geonode/*.patch; do patch -p1 < $i; done
 
 ENTRYPOINT ["/usr/src/sc/entrypoint.sh"]

@@ -1,0 +1,13 @@
+diff --git a/geonode/templates/base.html b/geonode/templates/base.html
+index 607aa971e..35ec1a2a4 100644
+--- a/geonode/templates/base.html
++++ b/geonode/templates/base.html
+@@ -373,7 +373,7 @@
+           {% endif %}
+           {% endblock contactus %}
+           <ul class="list-unstyled">
+-            <li>{% trans "Powered by" %} <a href="http://geonode.org">{% trans "GeoNode" %}</a> <em>{% trans "version" %} {{ VERSION }}</em></li>
++            <li>Made possible by <a href="http://geonode.org">{% trans "GeoNode" %}</a> <em>{% trans "version" %} {{ VERSION }}</em></li>
+             <li><a href="{% url "developer" %}">{% trans "Developers" %}</a> | <a href="{% url "about" %}">{% trans "About" %}</a><li>
+           </ul>
+           <label class="hidden">{% trans "Language" %}</label>
