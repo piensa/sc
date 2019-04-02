@@ -28,12 +28,15 @@ RUN GDAL_VERSION=`gdal-config --version` \
 RUN ln -fs /usr/lib/python2.7/plat-x86_64-linux-gnu/_sysconfigdata*.py /usr/lib/python2.7/
 
 # app-specific requirements
-COPY requirements.txt /usr/src/sc/
-RUN pip install --upgrade --no-cache-dir --src /usr/src -r requirements.txt
+#COPY requirements.txt /usr/src/sc/
+#RUN pip install --upgrade --no-cache-dir --src /usr/src -r requirements.txt
+RUN pip install pipenv
+
 
 # This should be close to the last step in order to avoid rebuilding image during development.
 COPY . /usr/src/sc
-RUN pip install --no-deps --upgrade -e .
+RUN pipenv install --system
+#RUN pip install --no-deps --upgrade -e .
 
 RUN chmod +x /usr/src/sc/tasks.py \
     && chmod +x /usr/src/sc/entrypoint.sh
