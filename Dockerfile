@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
                 libmemcached-dev libsasl2-dev zlib1g-dev \
                 python-pylibmc \
                 uwsgi uwsgi-plugin-python \
+                vim htop git \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # python-gdal does not work, let's replace it by pygdal
