@@ -294,3 +294,12 @@ certbot certonly --manual -d mydomain.com --agree-tos --manual-public-ip-logging
   }
 
 ```
+
+
+Loading only data
+
+Step 1. Get raster data from geoserver data dir, mount the volume on a docker container and use importlayers on the folder (OK)
+Step 2. Get vector data from the postgres data dump, mount the volume on the django container and run pg_restore (OK)
+Step 3. Dump list of layer names from postgres into a csv
+Step 4. Create layers using the names in the csv file
+Step 5. Write a script that matches tables in the database with tables in django and creates geoserver entries.

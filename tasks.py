@@ -116,6 +116,15 @@ def fixtures(ctx):
 --settings={0}".format(_localsettings()), pty=True)
     ctx.run("python manage.py set_all_layers_alternate \
 --settings={0}".format(_localsettings()), pty=True)
+    ctx.run("python manage.py loaddata fixtures/base.json \
+--settings={0}".format(_localsettings()), pty=True)
+    ctx.run("python manage.py loaddata fixtures/layers.json \
+--settings={0}".format(_localsettings()), pty=True)
+    ctx.run("python manage.py rebuild_index --noinput --settings={0}".format(
+            _localsettings()
+        ), pty=True)
+
+
 
 
 @task
