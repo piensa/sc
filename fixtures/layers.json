@@ -1,4 +1,3 @@
-JSONField implementation is: <class 'jsonfield.fields.JSONField'>
 [
 {
   "model": "layers.layer",
