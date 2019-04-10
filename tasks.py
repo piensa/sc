@@ -119,7 +119,7 @@ def fixtures(ctx):
 
 
 @task
-def more_fixtures(ctx):
+def morefixtures(ctx):
     print "**************************fixtures********************************"
     ctx.run("python manage.py loaddata fixtures/base.json \
 --settings={0}".format(_localsettings()), pty=True)
