@@ -1,0 +1,101 @@
+diff --git a/geonode/static/geonode/js/search/search.js b/geonode/static/geonode/js/search/search.js
+index 64f32ff..6b5a356 100644
+--- a/geonode/static/geonode/js/search/search.js
++++ b/geonode/static/geonode/js/search/search.js
+@@ -283,7 +283,68 @@
+   * Load data from api and defines the multiple and single choice handlers
+   * Syncs the browser url with the selections
+   */
+-  module.controller('geonode_search_controller', function($injector, $scope, $location, $http, Configs){
++  module.controller('geonode_search_controller', function($injector, $scope, $location, $timeout, $http, Configs, $filter){
++	function templateHTML(item, props={}) {
++		return `<article resource_id="${item.id || ''}">
++		      <div class="col-lg-12 item-container">
++		        <div class="col-lg-12 profile-avatar">
++		          <div class="col-lg-4 item-thumb">
++		            <a href="${item.detail_url || ''}">
++		              <img src="${item.thumbnail_url || ''}" />
++		            </a>
++		          </div>
++			  <div class="col-lg-8 item-details">
++			    <div class="row">
++			      <div class="col-xs-10">
++			        <p class="item-meta">
++			          <span class="item-category">${item.category__gn_description || ''}</span><br>
++			         ${ !item.group ? '' :
++				  `<span class="item-category" ng-if="item.group">
++				    <a href="${item.site_url}groups/group/${item.group}/activity/">
++					<i class="fa fa-group" aria-hidden="true" style="margin-right: 8px;"></i>
++					${item.group_name || ''}</a><br>
++				   </span>`
++				 }
++			        </p>
++				<h4>
++			          ${ item.store_type !== 'remoteStore' ? '' : `<i title="Remote Service" class="fa fa-external-link fa-1" style="vertical-align:  middle;padding-right: 10px;"></i>`}
++			          ${ item.store_type !== 'dataStore'   ? '' : `<i title="Vector Data" class="fa fa-pencil-square-o fa-1" style="vertical-align:  middle;padding-right: 10px;"></i>`}
++			          ${ item.store_type !== 'coverageStore' ? '' : `<i title="Raster Data" class="fa fa-picture-o fa-1" style="vertical-align:  middle;padding-right: 10px;"></i>`}
++			          ${ item.store_type !== 'dataset'     ? '' : `<i title="File/Dataset" class="fa fa-newspaper-o fa-1" style="vertical-align:  middle;padding-right: 10px;"></i>`}
++			          ${ item.store_type !== 'map'         ? '' : `<i title="Map" class="fa fa-map-o fa-1" style="vertical-align:  middle;padding-right: 10px;"></i>`}
++			          <a target="_self" href="${item.detail_url}">${item.title || ''}</a>
++			        </h4>
++			      </div>
++			    </div>
++			    <p class="abstract">${ item.abstract.length > 300 ? item.abstract.substring(0, 300) +  '...' : item.abstract}</p>
++			    <div class="row">
++			      <div class="col-lg-12 item-items">
++			        <ul class="list-inline">
++			                <li><a href="${item.site_url}people/profile/${item.owner__username}"><i class="fa fa-user"></i>${item.owner_name || ''}</a></li>
++			                <li><a href="${item.detail_url}#info"><i class="fa fa-calendar-o"></i>${ $filter('date')(item.date, 'd MMM y')}</a></li>
++			                <li><a href="${item.detail_url}"><i class="fa fa-eye"></i>${item.popular_count}</a></li>
++			                <li><a href="${item.detail_url}#share"><i class="fa fa-share"></i>${item.share_count}</a></li>
++			                <li><a href="${item.detail_url}#rate"><i class="fa fa-star"></i>${item.rating}</a></li>
++			                <li>
++					  ${ item.detail_url.indexOf('/layers/') <= -1 ? '' :
++					    `<a target="_self" href="${props.newMap}?layer=${item.detail_url.substring(8)}"><i class="fa fa-map-marker"></i>Create a Map</a>`
++					  }
++			                </li>
++			                <li> 
++					  ${ item.detail_url.indexOf('/maps/') <= -1 ? '' : 
++					  `<a href="${item.site_url}maps/${item.id}/view"><i class="fa fa-map-marker"></i>View Map</a>`
++					  }
++					</li>
++			        </ul>
++			      </div>
++			    </div>
++
++			  </div>
++		        </div>
++		      </div>
++		  </article>`;
++	}
++    
+     $scope.query = $location.search();
+     $scope.query.limit = $scope.query.limit || CLIENT_RESULTS_LIMIT;
+     $scope.query.offset = $scope.query.offset || 0;
+@@ -291,9 +352,25 @@
+ 
+     //Get data from apis and make them available to the page
+     function query_api(data){
++      //fetch('http://localhost/static/geonode/js/search/data.json').then(x => x.json())
++	//.then(data => {
++
+       $http.get(Configs.url, {params: data || {}}).success(function(data){
+         setTimeout(function(){$('[ng-controller="CartList"] [data-toggle="tooltip"]').tooltip();},0);
+-        $scope.results = data.objects;
++        
++	const container = $('#explore-layer-list');
++	const props = { 
++	  newMap: container.data("newMap")
++	}
++	
++	// $scope.results = data.objects; // <-- slow code removed
++	
++	for(let i=0; i < data.objects.length; i++){
++	  $timeout(() => {
++	    container.append(templateHTML(data.objects[i], props) );
++	  }, i*50);
++	}
++
+         $scope.total_counts = data.meta.total_count;
+         $scope.$root.query_data = data;
+         if (HAYSTACK_SEARCH) {
