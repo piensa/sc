@@ -1,5 +1,5 @@
 diff --git a/geonode/static/geonode/js/search/search.js b/geonode/static/geonode/js/search/search.js
-index 64f32ff..6b5a356 100644
+index 64f32fffc..64b309f72 100644
 --- a/geonode/static/geonode/js/search/search.js
 +++ b/geonode/static/geonode/js/search/search.js
 @@ -283,7 +283,68 @@
@@ -72,12 +72,10 @@ index 64f32ff..6b5a356 100644
      $scope.query = $location.search();
      $scope.query.limit = $scope.query.limit || CLIENT_RESULTS_LIMIT;
      $scope.query.offset = $scope.query.offset || 0;
-@@ -291,9 +352,25 @@
+@@ -291,9 +352,23 @@
  
      //Get data from apis and make them available to the page
      function query_api(data){
-+      //fetch('http://localhost/static/geonode/js/search/data.json').then(x => x.json())
-+	//.then(data => {
 +
        $http.get(Configs.url, {params: data || {}}).success(function(data){
          setTimeout(function(){$('[ng-controller="CartList"] [data-toggle="tooltip"]').tooltip();},0);
