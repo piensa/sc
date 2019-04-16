@@ -1,8 +1,8 @@
 diff --git a/geonode/static/geonode/js/search/search.js b/geonode/static/geonode/js/search/search.js
-index 64f32fffc..64b309f72 100644
+index 64f32fffc..16cad9e8f 100644
 --- a/geonode/static/geonode/js/search/search.js
 +++ b/geonode/static/geonode/js/search/search.js
-@@ -283,7 +283,68 @@
+@@ -283,17 +283,93 @@
    * Load data from api and defines the multiple and single choice handlers
    * Syncs the browser url with the selections
    */
@@ -72,8 +72,8 @@ index 64f32fffc..64b309f72 100644
      $scope.query = $location.search();
      $scope.query.limit = $scope.query.limit || CLIENT_RESULTS_LIMIT;
      $scope.query.offset = $scope.query.offset || 0;
-@@ -291,9 +352,23 @@
- 
+     $scope.page = Math.round(($scope.query.offset / $scope.query.limit) + 1);
+-
      //Get data from apis and make them available to the page
      function query_api(data){
 +
@@ -87,7 +87,9 @@ index 64f32fffc..64b309f72 100644
 +	}
 +	
 +	// $scope.results = data.objects; // <-- slow code removed
-+	
++	if(container.children().length){
++	  container.empty()
++	}
 +	for(let i=0; i < data.objects.length; i++){
 +	  $timeout(() => {
 +	    container.append(templateHTML(data.objects[i], props) );
@@ -97,3 +99,12 @@ index 64f32fffc..64b309f72 100644
          $scope.total_counts = data.meta.total_count;
          $scope.$root.query_data = data;
          if (HAYSTACK_SEARCH) {
+@@ -343,7 +419,7 @@
+       if($scope.numpages < $scope.page){
+         $scope.page = 1;
+         $scope.query.offset = 0;
+-        query_api($scope.query);
++	query_api($scope.query);
+       }
+ 
+       // In case of no results, the number of pages is one.
