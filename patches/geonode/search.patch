@@ -1,8 +1,116 @@
 diff --git a/geonode/static/geonode/js/search/search.js b/geonode/static/geonode/js/search/search.js
-index 64f32fffc..16cad9e8f 100644
+index 64f32fffc..af9912ca6 100644
 --- a/geonode/static/geonode/js/search/search.js
 +++ b/geonode/static/geonode/js/search/search.js
-@@ -283,17 +283,93 @@
+@@ -29,16 +29,13 @@
+   // Load categories, keywords, and regions
+   module.load_categories = function ($http, $rootScope, $location){
+         var params = typeof FILTER_TYPE == 'undefined' ? {} : {'type': FILTER_TYPE};
+-        if ($location.search().hasOwnProperty('title__icontains')){
+-          params['title__icontains'] = $location.search()['title__icontains'];
+-        }
+         $http.get(CATEGORIES_ENDPOINT, {params: params}).success(function(data){
+             if($location.search().hasOwnProperty('category__identifier__in')){
+                 data.objects = module.set_initial_filters_from_query(data.objects,
+                     $location.search()['category__identifier__in'], 'identifier');
+             }
+             $rootScope.categories = data.objects;
+-            if (HAYSTACK_FACET_COUNTS && $rootScope.query_data) {
++            if ( $rootScope.query_data) {
+                 module.haystack_facets($http, $rootScope, $location);
+             }
+         });
+@@ -47,16 +44,13 @@
+   // Load group categories
+   module.load_group_categories = function ($http, $rootScope, $location){
+         var params = typeof FILTER_TYPE == 'undefined' ? {} : {'type': FILTER_TYPE};
+-        if ($location.search().hasOwnProperty('name__icontains')){
+-          params['name__icontains'] = $location.search()['name__icontains'];
+-        }
+         $http.get(GROUP_CATEGORIES_ENDPOINT, {params: params}).success(function(data){
+             if($location.search().hasOwnProperty('slug')){
+                 data.objects = module.set_initial_filters_from_query(data.objects,
+                     $location.search()['slug'], 'identifier');
+             }
+             $rootScope.categories = data.objects;
+-            if (HAYSTACK_FACET_COUNTS && $rootScope.query_data) {
++            if ( $rootScope.query_data) {
+                 module.haystack_facets($http, $rootScope, $location);
+             }
+         });
+@@ -64,16 +58,13 @@
+ 
+   module.load_keywords = function ($http, $rootScope, $location){
+         var params = typeof FILTER_TYPE == 'undefined' ? {} : {'type': FILTER_TYPE};
+-        if ($location.search().hasOwnProperty('title__icontains')){
+-          params['title__icontains'] = $location.search()['title__icontains'];
+-        }
+         $http.get(KEYWORDS_ENDPOINT, {params: params}).success(function(data){
+             if($location.search().hasOwnProperty('keywords__slug__in')){
+                 data.objects = module.set_initial_filters_from_query(data.objects,
+                     $location.search()['keywords__slug__in'], 'slug');
+             }
+             $rootScope.keywords = data.objects;
+-            if (HAYSTACK_FACET_COUNTS && $rootScope.query_data) {
++            if ($rootScope.query_data) {
+                 module.haystack_facets($http, $rootScope, $location);
+             }
+         });
+@@ -108,16 +99,13 @@
+ 
+   module.load_t_keywords = function ($http, $rootScope, $location){
+         var params = typeof FILTER_TYPE == 'undefined' ? {} : {'type': FILTER_TYPE};
+-        if ($location.search().hasOwnProperty('title__icontains')){
+-          params['title__icontains'] = $location.search()['title__icontains'];
+-        }
+         $http.get(T_KEYWORDS_ENDPOINT, {params: params}).success(function(data){
+             if($location.search().hasOwnProperty('tkeywords__id__in')){
+                 data.objects = module.set_initial_filters_from_query(data.objects,
+                     $location.search()['tkeywords__id__in'], 'id');
+             }
+             $rootScope.tkeywords = data.objects;
+-            if (HAYSTACK_FACET_COUNTS && $rootScope.query_data) {
++            if ($rootScope.query_data) {
+                 module.haystack_facets($http, $rootScope, $location);
+             }
+         });
+@@ -125,16 +113,13 @@
+ 
+   module.load_regions = function ($http, $rootScope, $location){
+         var params = typeof FILTER_TYPE == 'undefined' ? {} : {'type': FILTER_TYPE};
+-        if ($location.search().hasOwnProperty('title__icontains')){
+-          params['title__icontains'] = $location.search()['title__icontains'];
+-        }
+         $http.get(REGIONS_ENDPOINT, {params: params}).success(function(data){
+             if($location.search().hasOwnProperty('regions__name__in')){
+                 data.objects = module.set_initial_filters_from_query(data.objects,
+                     $location.search()['regions__name__in'], 'name');
+             }
+             $rootScope.regions = data.objects;
+-            if (HAYSTACK_FACET_COUNTS && $rootScope.query_data) {
++            if ($rootScope.query_data) {
+                 module.haystack_facets($http, $rootScope, $location);
+             }
+         });
+@@ -142,16 +127,13 @@
+ 
+     module.load_owners = function ($http, $rootScope, $location){
+         var params = typeof FILTER_TYPE == 'undefined' ? {} : {'type': FILTER_TYPE};
+-        if ($location.search().hasOwnProperty('title__icontains')){
+-            params['title__icontains'] = $location.search()['title__icontains'];
+-        }
+         $http.get(OWNERS_ENDPOINT, {params: params}).success(function(data){
+             if($location.search().hasOwnProperty('owner__username__in')){
+                 data.objects = module.set_initial_filters_from_query(data.objects,
+                     $location.search()['owner__username__in'], 'identifier');
+             }
+             $rootScope.owners = data.objects;
+-            if (HAYSTACK_FACET_COUNTS && $rootScope.query_data) {
++            if ($rootScope.query_data) {
+                 module.haystack_facets($http, $rootScope, $location);
+             }
+         });
+@@ -283,31 +265,100 @@
    * Load data from api and defines the multiple and single choice handlers
    * Syncs the browser url with the selections
    */
@@ -98,8 +206,30 @@ index 64f32fffc..16cad9e8f 100644
 +
          $scope.total_counts = data.meta.total_count;
          $scope.$root.query_data = data;
-         if (HAYSTACK_SEARCH) {
-@@ -343,7 +419,7 @@
+-        if (HAYSTACK_SEARCH) {
+           if ($location.search().hasOwnProperty('q')){
+             $scope.text_query = $location.search()['q'].replace(/\+/g," ");
+           }
+-        } else {
+-          if ($location.search().hasOwnProperty('title__icontains')){
+-            $scope.text_query = $location.search()['title__icontains'].replace(/\+/g," ");
+-          }
+-        }
+ 
+         //Update facet/keyword/category counts from search results
+-        if (HAYSTACK_FACET_COUNTS){
+             try {
+                 module.haystack_facets($http, $scope.$root, $location);
+                 $("#types").find("a").each(function(){
+@@ -323,7 +374,6 @@
+             } catch(err) {
+                 // console.log(err);
+             }
+-        }
+       });
+     };
+     query_api($scope.query);
+@@ -343,7 +393,7 @@
        if($scope.numpages < $scope.page){
          $scope.page = 1;
          $scope.query.offset = 0;
@@ -108,3 +238,23 @@ index 64f32fffc..16cad9e8f 100644
        }
  
        // In case of no results, the number of pages is one.
+@@ -538,17 +588,8 @@
+     });
+ 
+     $('#text_search_btn').click(function(){
+-        if (HAYSTACK_SEARCH)
+-            $scope.query['q'] = $('#text_search_input').val();
+-        else
+-            if (AUTOCOMPLETE_URL_RESOURCEBASE == "/autocomplete/ProfileAutocomplete/")
+-                // a user profile has no title; if search was triggered from
+-                // the /people page, filter by username instead
+-                var query_key = 'username__icontains';
+-            else
+-                console.log('search key', $('#text_search_input').data());
+-                var query_key = $('#text_search_input').data('query-key')||'title__icontains';
+-            $scope.query[query_key] = $('#text_search_input').val();
++       $scope.query['q'] = $('#text_search_input').val();
++    
+         query_api($scope.query);
+     });
+ 
