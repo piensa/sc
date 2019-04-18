@@ -1,5 +1,5 @@
 diff --git a/geonode/static/geonode/js/search/search.js b/geonode/static/geonode/js/search/search.js
-index 64f32fffc..af9912ca6 100644
+index 64f32fffc..ce80beb76 100644
 --- a/geonode/static/geonode/js/search/search.js
 +++ b/geonode/static/geonode/js/search/search.js
 @@ -29,16 +29,13 @@
@@ -110,13 +110,13 @@ index 64f32fffc..af9912ca6 100644
                  module.haystack_facets($http, $rootScope, $location);
              }
          });
-@@ -283,31 +265,100 @@
+@@ -283,31 +265,126 @@
    * Load data from api and defines the multiple and single choice handlers
    * Syncs the browser url with the selections
    */
 -  module.controller('geonode_search_controller', function($injector, $scope, $location, $http, Configs){
-+  module.controller('geonode_search_controller', function($injector, $scope, $location, $timeout, $http, Configs, $filter){
-+	function templateHTML(item, props={}) {
++  module.controller('geonode_search_controller', function($injector, $scope, cart, $location, $timeout, $http, Configs, $filter){
++	function templateHTML(index, item, props={}) {
 +		return `<article resource_id="${item.id || ''}">
 +		      <div class="col-lg-12 item-container">
 +		        <div class="col-lg-12 profile-avatar">
@@ -146,6 +146,19 @@ index 64f32fffc..af9912ca6 100644
 +			          ${ item.store_type !== 'map'         ? '' : `<i title="Map" class="fa fa-map-o fa-1" style="vertical-align:  middle;padding-right: 10px;"></i>`}
 +			          <a target="_self" href="${item.detail_url}">${item.title || ''}</a>
 +			        </h4>
++			      </div>
++			      <div class="col-xs-2">
++			        <h4>
++			          ${ !cart ? '' :
++				  `<button
++				    id="cart-${item.id}"
++		                    class="btn btn-default btn-xs pull-right"
++				    data-index="${index}"
++		                    data-toggle="tooltip"
++		                    data-placement="bottom"
++		                    title="Select"><i class="fa fa-lg ${cart.getFaClass(item.id)}"></i>
++				   </button>`}
++			         </h4>
 +			      </div>
 +			    </div>
 +			    <p class="abstract">${ item.abstract.length > 300 ? item.abstract.substring(0, 300) +  '...' : item.abstract}</p>
@@ -182,12 +195,15 @@ index 64f32fffc..af9912ca6 100644
      $scope.query.offset = $scope.query.offset || 0;
      $scope.page = Math.round(($scope.query.offset / $scope.query.limit) + 1);
 -
++    
++    let layerList = [];
      //Get data from apis and make them available to the page
      function query_api(data){
 +
        $http.get(Configs.url, {params: data || {}}).success(function(data){
          setTimeout(function(){$('[ng-controller="CartList"] [data-toggle="tooltip"]').tooltip();},0);
 -        $scope.results = data.objects;
+-        $scope.total_counts = data.meta.total_count;
 +        
 +	const container = $('#explore-layer-list');
 +	const props = { 
@@ -196,15 +212,26 @@ index 64f32fffc..af9912ca6 100644
 +	
 +	// $scope.results = data.objects; // <-- slow code removed
 +	if(container.children().length){
-+	  container.empty()
++	  container.empty();
++	  layerList.forEach($timeout.cancel);
++	  layerList = [];
 +	}
 +	for(let i=0; i < data.objects.length; i++){
-+	  $timeout(() => {
-+	    container.append(templateHTML(data.objects[i], props) );
-+	  }, i*50);
++	  layerList.push($timeout(() => {
++	    container.append(templateHTML(i, data.objects[i], props) );
++	    layerList.shift();
++	  }, i*20));
 +	}
++	container.on('click', 'article button', function(){
++	  $timeout( () => {
++            const item = data.objects[this.dataset.index];
++	    $(this).find('i').removeClass(cart.getFaClass(item.id));
++            cart.toggleItem(item);
++	    $(this).find('i').addClass(cart.getFaClass(item.id));
++	  }, 0);
++	});
 +
-         $scope.total_counts = data.meta.total_count;
++	$scope.total_counts = data.meta.total_count;
          $scope.$root.query_data = data;
 -        if (HAYSTACK_SEARCH) {
            if ($location.search().hasOwnProperty('q')){
@@ -221,7 +248,7 @@ index 64f32fffc..af9912ca6 100644
              try {
                  module.haystack_facets($http, $scope.$root, $location);
                  $("#types").find("a").each(function(){
-@@ -323,7 +374,6 @@
+@@ -323,7 +400,6 @@
              } catch(err) {
                  // console.log(err);
              }
@@ -229,7 +256,7 @@ index 64f32fffc..af9912ca6 100644
        });
      };
      query_api($scope.query);
-@@ -343,7 +393,7 @@
+@@ -343,7 +419,7 @@
        if($scope.numpages < $scope.page){
          $scope.page = 1;
          $scope.query.offset = 0;
@@ -238,7 +265,7 @@ index 64f32fffc..af9912ca6 100644
        }
  
        // In case of no results, the number of pages is one.
-@@ -538,17 +588,8 @@
+@@ -538,17 +614,8 @@
      });
  
      $('#text_search_btn').click(function(){
